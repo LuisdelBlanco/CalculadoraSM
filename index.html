@@ -632,10 +632,10 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
         <div class="grid3">
           <div class="metric"><div class="metric-label">Total aportado</div><div class="metric-value" id="fMTotal">&mdash;</div></div>
           <div class="metric"><div class="metric-label" id="fLblRend">Intereses generados</div><div class="metric-value" id="fMRend">&mdash;</div></div>
-          <div class="metric"><div class="metric-label">Capital final</div><div class="metric-value" id="fMCap">&mdash;</div></div>
+          <div class="metric" style="border:2px solid var(--verde);"><div class="metric-label" style="color:var(--verde)">Capital final <span style="font-weight:400;text-transform:none;font-size:9px;">(editable &#9998;)</span></div><input type="text" id="fMCapInput" inputmode="numeric" onchange="recalcDesdeCapital()" style="width:100%;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--verde);padding:0;outline:none;" placeholder="&mdash;"></div>
           <div class="metric"><div class="metric-label">Rentabilidad total</div><div class="metric-value" id="fMPct">&mdash;</div></div>
           <div class="metric"><div class="metric-label">A&ntilde;os de ahorro</div><div class="metric-value" id="fMAnios">&mdash;</div></div>
-          <div class="metric" style="border:2px solid var(--rojo);"><div class="metric-label" style="color:var(--rojo)">Renta mensual estimada</div><div class="metric-value" id="fMMens" style="color:var(--rojo)">&mdash;</div></div>
+          <div class="metric" style="border:2px solid var(--rojo);"><div class="metric-label" style="color:var(--rojo)">Renta mensual <span style="font-weight:400;text-transform:none;font-size:9px;">(editable &#9998;)</span></div><input type="text" id="fMMensInput" inputmode="numeric" onchange="recalcDesdeRenta()" style="width:100%;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--rojo);padding:0;outline:none;" placeholder="&mdash;"></div>
         </div>
         <div class="card" style="padding:14px 20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
@@ -1517,7 +1517,7 @@ function fCalc() {
   // --- Metrics ---
   document.getElementById('fMTotal').textContent    = fK(sim.aportado);
   document.getElementById('fMRend').textContent     = fK(sim.rend);
-  document.getElementById('fMCap').textContent      = fK(sim.cap);
+  document.getElementById('fMCapInput').value       = Math.round(sim.cap).toLocaleString('es-ES')+' €';
   document.getElementById('fMPct').textContent      = sim.aportado>0 ? ((sim.rend/sim.aportado)*100).toFixed(1)+'%' : '\u2014';
   document.getElementById('fMAnios').textContent    = sim.anios+' a\u00f1os';
 
@@ -1527,7 +1527,7 @@ function fCalc() {
   // tasa mensual residual: durante el cobro el capital sigue rentando (usamos la misma tasa base, o garantizado si UL)
   var tasaRenta = isComp ? tGar2 : (isUL ? tUL : tGar);
   var rMensual = fRenta(sim.cap, tasaRenta, aniosRenta);
-  document.getElementById('fMMens').textContent = fEur(rMensual);
+  document.getElementById('fMMensInput').value = Math.round(rMensual).toLocaleString('es-ES')+' €';
   document.getElementById('fRentaNota').innerHTML =
     'Con <strong>' + fK(sim.cap) + '</strong> de capital podr\u00edas cobrar <strong>' + fEur(rMensual) + '/mes</strong> durante <strong>' + aniosRenta + ' a\u00f1os</strong>'
     + (tasaRenta > 0 ? ' (con el capital restante rentando al ' + tasaRenta + '% anual)' : '') + '.';
@@ -1770,6 +1770,84 @@ function fSwitch(v) {
   document.getElementById('fVistaTabla').style.display = v==='t' ? '' : 'none';
   document.getElementById('fTabGraf').classList.toggle('active', v==='g');
   document.getElementById('fTabTabla').classList.toggle('active', v==='t');
+}
+
+// ── CÁLCULO INVERSO ───────────────────────────────────────────────
+// Lee un número de un texto con formato español (35.000 €) → 35000
+function parseNum(txt){
+  if(!txt) return 0;
+  return parseFloat(String(txt).replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.')) || 0;
+}
+
+// Dado un capital objetivo, halla la aportación periódica necesaria (bisección)
+function aportacionParaCapital(objetivo){
+  var eIni  = parseInt(document.getElementById('fEdad').value)       || 30;
+  var eFin  = parseInt(document.getElementById('fEdadFin').value)     || 65;
+  var prima = parseFloat(document.getElementById('fPrimaIni').value)  || 0;
+  var per   = parseInt(document.getElementById('fPeriodo').value)     || 12;
+  var inc   = parseFloat(document.getElementById('fIncremento').value)|| 0;
+  var tGar  = parseFloat(document.getElementById('fTipoGar').value)   || 0;
+  var tUL   = parseFloat(document.getElementById('fTipoUL').value)    || 0;
+  var tasa  = (fProd==='ul') ? tUL : tGar;
+
+  // capital generado con aportación periódica = a (función creciente en a)
+  function capCon(a){
+    return fSim(tasa, eIni, eFin, prima, a, per, fSuplData, inc).cap;
+  }
+  // Si solo con prima inicial + suplementos ya se supera el objetivo, aportación 0
+  if(capCon(0) >= objetivo) return 0;
+  // Bisección entre 0 y un límite alto
+  var lo=0, hi=1000000, mid;
+  for(var k=0;k<60;k++){
+    mid=(lo+hi)/2;
+    if(capCon(mid) < objetivo) lo=mid; else hi=mid;
+  }
+  return Math.round((lo+hi)/2);
+}
+
+// Dada una renta mensual objetivo, primero halla el capital que la produce, luego la aportación
+function aportacionParaRenta(rentaObjetivo){
+  var aniosRenta = parseInt(document.getElementById('fAniosRenta').value) || 20;
+  var isComp = fProd==='comp', isUL = fProd==='ul';
+  var tGar  = parseFloat(document.getElementById('fTipoGar').value)  || 0;
+  var tGar2 = parseFloat(document.getElementById('fTipoGar2').value) || 0;
+  var tUL   = parseFloat(document.getElementById('fTipoUL').value)   || 0;
+  var tasaRenta = isComp ? tGar2 : (isUL ? tUL : tGar);
+  // invertir fRenta: capital necesario para una renta mensual dada
+  var nMeses = aniosRenta*12;
+  var iMensual = (tasaRenta/100)/12;
+  var capitalNecesario;
+  if(iMensual<=0){ capitalNecesario = rentaObjetivo * nMeses; }
+  else { capitalNecesario = rentaObjetivo * (1 - Math.pow(1+iMensual,-nMeses)) / iMensual; }
+  return aportacionParaCapital(capitalNecesario);
+}
+
+function aplicarAportacion(a){
+  document.getElementById('fAportacion').value = a;
+  // sincronizar control de presentación si existe
+  var pa = document.getElementById('fAportacionP');
+  if(pa) pa.value = a;
+  fCalc();
+}
+
+var _recalcLock=false;
+function recalcDesdeCapital(){
+  if(_recalcLock) return;
+  var objetivo = parseNum(document.getElementById('fMCapInput').value);
+  if(objetivo<=0) return;
+  _recalcLock=true;
+  var a = aportacionParaCapital(objetivo);
+  aplicarAportacion(a);
+  _recalcLock=false;
+}
+function recalcDesdeRenta(){
+  if(_recalcLock) return;
+  var objetivo = parseNum(document.getElementById('fMMensInput').value);
+  if(objetivo<=0) return;
+  _recalcLock=true;
+  var a = aportacionParaRenta(objetivo);
+  aplicarAportacion(a);
+  _recalcLock=false;
 }
 
 fRenderSupl();
