@@ -1680,7 +1680,7 @@ function fCalc() {
   }
   // Resumen: primera, media y última prima
   var resEl=document.getElementById('fPrimasResumen');
-  if(labelsP.length>=2 && aportAnual>0){
+  if(labelsP.length>=2 && aportBase>0){
     var iPrim=0, iUlt=labelsP.length-1, iMed=Math.floor(labelsP.length/2);
     function tarjeta(idx, etiqueta){
       var mult=(valoresFin[idx]/aportadoP[idx]);
