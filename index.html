@@ -558,6 +558,11 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
             </select>
           </div>
         </div>
+        <div style="margin-bottom:12px;">
+          <label>Aumento anual de la aportaci&oacute;n (%) <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;">(opcional)</span></label>
+          <input type="number" id="fIncremento" value="0" min="0" max="20" step="0.5" oninput="fCalc()">
+          <p class="act-note" style="color:var(--text-3);">&#9432; La aportaci&oacute;n sube este % cada a&ntilde;o sobre la del a&ntilde;o anterior (ej. IPC o subida de sueldo).</p>
+        </div>
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <label style="margin:0">Aportaciones suplementarias</label>
@@ -684,6 +689,19 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
       <p class="section-title">&#127919; Escenarios pesimista / base / optimista</p>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;" id="fEscCards"></div>
       <div style="position:relative;width:100%;height:240px;"><canvas id="fChartEsc"></canvas></div>
+    </div>
+
+    <!-- RENTABILIDAD DE CADA PRIMA POR EDAD -->
+    <div class="card" style="margin-bottom:16px;">
+      <p class="section-title">&#128176; Lo que vale cada prima seg&uacute;n cu&aacute;ndo se aporta</p>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Cada barra es una aportaci&oacute;n anual. La parte gris es lo aportado; la verde, el rendimiento que genera hasta el vencimiento. Las primas de los primeros a&ntilde;os trabajan mucho m&aacute;s porque tienen m&aacute;s tiempo para crecer.</p>
+      <div id="fPrimaIndicativo" style="background:var(--rojo-light);border-radius:10px;padding:14px 18px;margin-bottom:16px;border-left:4px solid var(--rojo);font-size:14px;color:var(--text);line-height:1.6;"></div>
+      <div class="legend" style="margin-bottom:8px;">
+        <span style="display:flex;align-items:center;gap:5px;"><span class="legend-dot" style="background:#B4B2A9;"></span>Prima aportada</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span class="legend-dot" style="background:#1a7a3a;"></span>Rendimiento generado</span>
+      </div>
+      <div style="position:relative;width:100%;height:300px;"><canvas id="fChartPrimas" role="img" aria-label="Valor de cada prima anual al vencimiento seg&uacute;n la edad de aportaci&oacute;n"></canvas></div>
+      <div id="fPrimasResumen" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px;"></div>
     </div>
 
     <div class="footer"><b>SM Seguros</b> &nbsp;&middot;&nbsp; Calculadora de Ahorro y Previsi&oacute;n &nbsp;&middot;&nbsp; Uso interno &nbsp;&middot;&nbsp; No constituye asesoramiento financiero</div>
@@ -1389,18 +1407,19 @@ function fK(n) {
   return fEur(n);
 }
 
-function fSim(tasa, eIni, eFin, prima, aport, periodo, supls) {
+function fSim(tasa, eIni, eFin, prima, aport, periodo, supls, incremento) {
   var anios = Math.max(0, eFin - eIni);
-  var aAnual = aport * periodo;
+  var inc = (incremento || 0) / 100;
   var cap = prima;
   var aportado = prima;
   var rows = [];
   for (var i = 0; i < anios; i++) {
+    var aAnual = aport * periodo * Math.pow(1 + inc, i); // aportación con aumento compuesto
     var supl = 0;
     supls.forEach(function(s) { if (s.anio===i+1) supl += s.importe; });
     cap = cap * (1 + tasa/100) + aAnual + supl;
     aportado += aAnual + supl;
-    rows.push({ anio:i+1, edad:eIni+i+1, aportado:aportado, supl:supl, rend:cap-aportado, cap:cap });
+    rows.push({ anio:i+1, edad:eIni+i+1, aportado:aportado, supl:supl, aportAnio:aAnual, rend:cap-aportado, cap:cap });
   }
   return { cap:cap, aportado:aportado, rend:cap-aportado, anios:anios, rows:rows };
 }
@@ -1423,6 +1442,7 @@ function fCalc() {
   var aport  = parseFloat(document.getElementById('fAportacion').value)|| 0;
   var per    = parseInt(document.getElementById('fPeriodo').value)     || 12;
   var ret    = parseInt(document.getElementById('fRetraso').value)     || 5;
+  var inc    = parseFloat(document.getElementById('fIncremento').value) || 0;
   var tGar   = parseFloat(document.getElementById('fTipoGar').value)   || 0;
   var tUL    = parseFloat(document.getElementById('fTipoUL').value)    || 0;
   var tGar2  = parseFloat(document.getElementById('fTipoGar2').value)  || 0;
@@ -1431,7 +1451,7 @@ function fCalc() {
   var isUL   = fProd === 'ul';
   var isComp = fProd === 'comp';
   var tasa   = isUL ? tUL : tGar;
-  var sim    = fSim(tasa, eIni, eFin, prima, aport, per, fSuplData);
+  var sim    = fSim(tasa, eIni, eFin, prima, aport, per, fSuplData, inc);
 
   // Guardar acumulado para enlazar con la calculadora de Vida
   window.fLastRows = sim.rows;
@@ -1462,8 +1482,8 @@ function fCalc() {
 
   // --- Comparativa ---
   if (isComp) {
-    var sG = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData);
-    var sU = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData);
+    var sG = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData, inc);
+    var sU = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData, inc);
     document.getElementById('fCompCards').innerHTML =
       '<div style="background:var(--bg);border-radius:10px;padding:14px;border:2px solid var(--border)">'
       +'<p style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-3);margin-bottom:6px">\uD83D\uDD12 Garantizado ('+tGar2+'%)</p>'
@@ -1482,8 +1502,8 @@ function fCalc() {
   var datasets = [];
 
   if (isComp) {
-    var sGc = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData);
-    var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData);
+    var sGc = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData, inc);
+    var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData, inc);
     datasets = [
       {label:'Aportado',    data:dAport,  borderColor:'#9a7080',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,tension:0.3},
       {label:'Garantizado', data:sGc.rows.map(function(r){return +r.cap.toFixed(2);}), borderColor:'#0050bf',borderWidth:2,pointRadius:0,fill:false,tension:0.3},
@@ -1508,8 +1528,8 @@ function fCalc() {
   var dRend = sim.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);});
   var barDatasets;
   if (isComp) {
-    var sGc = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData);
-    var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData);
+    var sGc = fSim(tGar2, eIni, eFin, prima, aport, per, fSuplData, inc);
+    var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData, inc);
     barDatasets = [
       {label:'Aportado',           data:dAport,  backgroundColor:'rgba(154,112,128,0.5)', stack:'g'},
       {label:'Rend. Garantizado',  data:sGc.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);}), backgroundColor:'rgba(0,80,191,0.7)', stack:'g'},
@@ -1561,8 +1581,8 @@ function fCalc() {
   document.getElementById('fTabRows').innerHTML = rows_html;
 
   // --- Coste de esperar ---
-  var sHoy   = fSim(tasa, eIni,       eFin, prima, aport, per, fSuplData);
-  var sTarde = fSim(tasa, eIni+ret,   eFin, prima, aport, per, fSuplData);
+  var sHoy   = fSim(tasa, eIni,       eFin, prima, aport, per, fSuplData, inc);
+  var sTarde = fSim(tasa, eIni+ret,   eFin, prima, aport, per, fSuplData, inc);
   var diff   = sHoy.cap - sTarde.cap;
   var dRend  = sHoy.rend - sTarde.rend;
   var rLbl   = isUL ? 'rend. est.' : 'intereses';
@@ -1586,9 +1606,9 @@ function fCalc() {
   // --- Escenarios ---
   var vP = Math.max(0, tasa-2);
   var vO = tasa+2;
-  var sP = fSim(vP,   eIni, eFin, prima, aport, per, fSuplData);
-  var sB = fSim(tasa, eIni, eFin, prima, aport, per, fSuplData);
-  var sO = fSim(vO,   eIni, eFin, prima, aport, per, fSuplData);
+  var sP = fSim(vP,   eIni, eFin, prima, aport, per, fSuplData, inc);
+  var sB = fSim(tasa, eIni, eFin, prima, aport, per, fSuplData, inc);
+  var sO = fSim(vO,   eIni, eFin, prima, aport, per, fSuplData, inc);
   var eL = isUL ? 'Rend. est.' : 'Intereses';
 
   document.getElementById('fEscCards').innerHTML =
@@ -1617,6 +1637,79 @@ function fCalc() {
     ]},
     options:escOpts
   });
+
+  // ── Rentabilidad de cada prima según la edad a la que se aporta ──
+  var aportBase = aport * per;
+  var incF = (inc || 0) / 100;
+  var labelsP=[], aportadoP=[], rendP=[], valoresFin=[];
+  for(var ed=eIni; ed<eFin; ed++){
+    var idxAnio = ed - eIni;
+    var aportAnioEd = aportBase * Math.pow(1 + incF, idxAnio); // prima de ese año con aumento aplicado
+    var aniosCrece = eFin - ed;
+    var valorFinal = aportAnioEd * Math.pow(1 + tasa/100, aniosCrece);
+    labelsP.push(ed);
+    aportadoP.push(Math.round(aportAnioEd));
+    rendP.push(Math.round(valorFinal - aportAnioEd));
+    valoresFin.push(valorFinal);
+  }
+  if(window.fChartPrimasInst) window.fChartPrimasInst.destroy();
+  if(labelsP.length){
+    window.fChartPrimasInst = new Chart(document.getElementById('fChartPrimas').getContext('2d'), {
+      type:'bar',
+      data:{labels:labelsP, datasets:[
+        {label:'Aportado', data:aportadoP, backgroundColor:'#B4B2A9', stack:'s'},
+        {label:'Rendimiento', data:rendP, backgroundColor:'#1a7a3a', stack:'s'}
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            title:function(items){return 'Prima aportada a los '+items[0].label+' años';},
+            label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString('es-ES')+' €';},
+            footer:function(items){var t=items.reduce(function(a,i){return a+i.parsed.y;},0);return 'Valor a los '+eFin+': '+t.toLocaleString('es-ES')+' €';}
+          }}
+        },
+        scales:{
+          x:{stacked:true, title:{display:true,text:'Edad a la que se aporta la prima',font:{size:11}}, grid:{display:false}, ticks:{font:{size:10},autoSkip:true,maxTicksLimit:14}},
+          y:{stacked:true, ticks:{font:{size:10},callback:function(v){return (v/1000)+'k€';}}, grid:{color:'rgba(0,0,0,0.05)'}}
+        }
+      }
+    });
+  }
+  // Resumen: primera, media y última prima
+  var resEl=document.getElementById('fPrimasResumen');
+  if(labelsP.length>=2 && aportAnual>0){
+    var iPrim=0, iUlt=labelsP.length-1, iMed=Math.floor(labelsP.length/2);
+    function tarjeta(idx, etiqueta){
+      var mult=(valoresFin[idx]/aportadoP[idx]);
+      return '<div style="background:var(--bg);border-radius:10px;padding:12px;">'
+        +'<div style="font-size:12px;color:var(--text-3);margin-bottom:4px;">Prima a los '+labelsP[idx]+'</div>'
+        +'<div style="font-size:18px;font-weight:700;font-family:\'Syne\',sans-serif;color:var(--verde);">'+Math.round(valoresFin[idx]).toLocaleString('es-ES')+' €</div>'
+        +'<div style="font-size:11px;color:var(--text-3);margin-top:2px;">×'+mult.toFixed(1)+' lo aportado</div></div>';
+    }
+    resEl.innerHTML=tarjeta(iPrim)+tarjeta(iMed)+tarjeta(iUlt);
+  } else {
+    resEl.innerHTML='';
+  }
+
+  // Indicativo de la prima (mensual → anual → valor de la primera prima)
+  var indEl=document.getElementById('fPrimaIndicativo');
+  if(indEl){
+    if(aportBase>0 && labelsP.length>=1){
+      var nombrePer={12:'mes',4:'trimestre',2:'semestre',1:'año'}[per]||'periodo';
+      var multPrim=(valoresFin[0]/aportadoP[0]);
+      var incTxt = (inc>0) ? ' Con un aumento anual del '+inc+'%, las aportaciones de los años siguientes serán mayores.' : '';
+      indEl.style.display='';
+      indEl.innerHTML='Aportando <strong>'+aport.toLocaleString('es-ES')+' € al '+nombrePer+'</strong>'
+        +' &rarr; <strong>'+aportBase.toLocaleString('es-ES')+' € el primer año</strong>. '
+        +'La primera prima (a los '+labelsP[0]+' años) se convierte en <strong>'+Math.round(valoresFin[0]).toLocaleString('es-ES')+' €</strong> al vencimiento, '
+        +'un <strong>×'+multPrim.toFixed(1)+'</strong> de lo aportado.'+incTxt;
+    } else {
+      indEl.style.display='none';
+    }
+  }
 }
 
 function fSwitch(v) {
