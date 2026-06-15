@@ -64,9 +64,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 
 /* ── RESPONSIVE MÓVIL ─────────────────────── */
 @media(max-width:768px){
-  body{font-size:13px;}
+  body{font-size:13px;flex-direction:column;}
   /* Sidebar pasa a barra horizontal arriba */
-  .sidebar{position:relative;width:100%;min-height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;padding:8px 12px;gap:8px;}
+  .sidebar{position:static!important;width:100%!important;min-height:auto!important;flex-direction:row!important;align-items:center;flex-wrap:wrap;padding:8px 12px;gap:8px;}
   .sidebar-logo{padding:6px 8px;border-bottom:none;flex:0 0 auto;gap:8px;}
   .sidebar-logo-mark{width:30px;height:30px;}
   .sidebar-logo-mark svg{width:27px;height:27px;}
@@ -76,7 +76,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
   .nav-item{flex:1 1 auto;justify-content:center;margin:0;padding:8px 10px;font-size:12px;min-width:120px;}
   .sidebar-bottom{display:none;}
   /* Contenido a todo el ancho */
-  .main{margin-left:0;}
+  .main{margin-left:0!important;width:100%!important;}
   .content{padding:14px 12px 28px;}
   /* Topbar más compacta */
   .topbar{padding:10px 14px;flex-wrap:wrap;gap:8px;}
