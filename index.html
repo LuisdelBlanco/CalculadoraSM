@@ -175,6 +175,13 @@ select:focus{border-color:var(--rojo);}
 .footer{text-align:center;font-size:11px;color:var(--text-3);margin-top:28px;padding-top:16px;border-top:1px solid var(--border);text-transform:uppercase;letter-spacing:0.07em;}
 .footer b{color:var(--rojo);}
 
+/* ── PÁGINA "PRÓXIMAMENTE" ─────────────────── */
+.coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;min-height:50vh;}
+.coming-soon .cs-icon{font-size:56px;margin-bottom:18px;}
+.coming-soon h2{font-family:"Syne",sans-serif;font-weight:800;font-size:24px;color:var(--rojo);margin-bottom:10px;}
+.coming-soon p{font-size:15px;color:var(--text-2);line-height:1.6;max-width:420px;margin-bottom:6px;}
+.coming-soon .cs-badge{display:inline-block;background:var(--rojo-light);color:var(--rojo);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:18px;}
+
 /* ── BOTÓN MODO PRESENTACIÓN ─────────────── */
 .btn-present{
   background:var(--rojo);border:none;border-radius:8px;
@@ -279,6 +286,9 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
   <div class="nav-section">Herramientas</div>
   <div class="nav-item active" id="navVida" onclick="showPage('vida')"><span style="font-size:15px">&#129518;</span> Calculadora Vida</div>
   <div class="nav-item" id="navFinanciera" onclick="showPage('financiera')"><span style="font-size:15px">&#128200;</span> Calculadora Ahorro</div>
+  <div class="nav-item" id="navHipoteca" onclick="showPage('hipoteca')"><span style="font-size:15px">&#127968;</span> Calculadora Hipotecaria</div>
+  <div class="nav-item" id="navDecesos" onclick="showPage('decesos')"><span style="font-size:15px">&#128220;</span> Calculadora Decesos</div>
+  <div class="nav-item" id="navSenior" onclick="showPage('senior')"><span style="font-size:15px">&#128116;</span> Vida S&eacute;nior</div>
   <div class="sidebar-bottom">
     <button id="btnInstalar" onclick="instalarApp()" style="display:none;width:100%;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:9px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px;">⬇ Instalar app</button>
     SM Seguros · Uso interno
@@ -314,6 +324,30 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
         <span id="badgeName2"></span>
       </div>
       <button class="btn-present" onclick="togglePresentacion()">👁 Modo presentación</button>
+    </div>
+  </div>
+
+  <!-- TOPBAR HIPOTECA -->
+  <div class="topbar" id="topbarHipoteca" style="display:none">
+    <div>
+      <div class="topbar-title">Calculadora Hipotecaria</div>
+      <div class="topbar-sub">Cuota &middot; Amortizaci&oacute;n &middot; Intereses &middot; Capital pendiente</div>
+    </div>
+  </div>
+
+  <!-- TOPBAR DECESOS -->
+  <div class="topbar" id="topbarDecesos" style="display:none">
+    <div>
+      <div class="topbar-title">Calculadora de Decesos</div>
+      <div class="topbar-sub">Prima &middot; Capital garantizado &middot; Modalidades</div>
+    </div>
+  </div>
+
+  <!-- TOPBAR VIDA SÉNIOR -->
+  <div class="topbar" id="topbarSenior" style="display:none">
+    <div>
+      <div class="topbar-title">Vida S&eacute;nior</div>
+      <div class="topbar-sub">Protecci&oacute;n a partir de cierta edad &middot; Capitales &middot; Primas</div>
     </div>
   </div>
 
@@ -761,6 +795,46 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
 
     <div class="footer"><b>SM Seguros</b> &nbsp;&middot;&nbsp; Calculadora de Ahorro y Previsi&oacute;n &nbsp;&middot;&nbsp; Uso interno &nbsp;&middot;&nbsp; No constituye asesoramiento financiero</div>
   </div><!-- /pageFinanciera -->
+
+  <!-- PAGE HIPOTECA -->
+  <div id="pageHipoteca" class="content" style="display:none">
+    <div class="card">
+      <div class="coming-soon">
+        <div class="cs-icon">&#127968;</div>
+        <h2>Calculadora Hipotecaria</h2>
+        <p>Estamos trabajando en ello.</p>
+        <p>Muy pronto podr&aacute;s calcular cuotas, cuadros de amortizaci&oacute;n, intereses y capital pendiente directamente desde aqu&iacute;.</p>
+        <p>Adem&aacute;s, podr&aacute;s comprobar si al cliente le compensa contratar el seguro de vida con nosotros seg&uacute;n el <strong>diferencial que le aplique el banco</strong>, comparando el ahorro en la cuota hipotecaria frente al coste de la p&oacute;liza.</p>
+        <span class="cs-badge">Pr&oacute;ximamente</span>
+      </div>
+    </div>
+  </div><!-- /pageHipoteca -->
+
+  <!-- PAGE DECESOS -->
+  <div id="pageDecesos" class="content" style="display:none">
+    <div class="card">
+      <div class="coming-soon">
+        <div class="cs-icon">&#128220;</div>
+        <h2>Calculadora de Decesos</h2>
+        <p>Estamos trabajando en ello.</p>
+        <p>Muy pronto podr&aacute;s calcular primas y capitales garantizados de los seguros de decesos seg&uacute;n edad y modalidad.</p>
+        <span class="cs-badge">Pr&oacute;ximamente</span>
+      </div>
+    </div>
+  </div><!-- /pageDecesos -->
+
+  <!-- PAGE VIDA SÉNIOR -->
+  <div id="pageSenior" class="content" style="display:none">
+    <div class="card">
+      <div class="coming-soon">
+        <div class="cs-icon">&#128116;</div>
+        <h2>Vida S&eacute;nior</h2>
+        <p>Estamos trabajando en ello.</p>
+        <p>Muy pronto podr&aacute;s calcular primas y capitales de los seguros de vida pensados para clientes de mayor edad.</p>
+        <span class="cs-badge">Pr&oacute;ximamente</span>
+      </div>
+    </div>
+  </div><!-- /pageSenior -->
 
 </main>
 
@@ -1262,10 +1336,19 @@ calcular();
 function showPage(p) {
   document.getElementById('pageVida').style.display         = p==='vida'       ? '' : 'none';
   document.getElementById('pageFinanciera').style.display   = p==='financiera' ? '' : 'none';
+  document.getElementById('pageHipoteca').style.display     = p==='hipoteca'   ? '' : 'none';
+  document.getElementById('pageDecesos').style.display      = p==='decesos'    ? '' : 'none';
+  document.getElementById('pageSenior').style.display       = p==='senior'     ? '' : 'none';
   document.getElementById('topbarVida').style.display       = p==='vida'       ? '' : 'none';
   document.getElementById('topbarFinanciera').style.display = p==='financiera' ? '' : 'none';
+  document.getElementById('topbarHipoteca').style.display   = p==='hipoteca'   ? '' : 'none';
+  document.getElementById('topbarDecesos').style.display    = p==='decesos'    ? '' : 'none';
+  document.getElementById('topbarSenior').style.display     = p==='senior'     ? '' : 'none';
   document.getElementById('navVida').classList.toggle('active',       p==='vida');
   document.getElementById('navFinanciera').classList.toggle('active', p==='financiera');
+  document.getElementById('navHipoteca').classList.toggle('active',   p==='hipoteca');
+  document.getElementById('navDecesos').classList.toggle('active',    p==='decesos');
+  document.getElementById('navSenior').classList.toggle('active',     p==='senior');
   window._currentPage = p;
   if (p === 'financiera') setTimeout(fCalc, 80);
 }
