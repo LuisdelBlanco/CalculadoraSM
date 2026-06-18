@@ -141,6 +141,13 @@ select:focus{border-color:var(--rojo);}
 .mode-btn{flex:1;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-3);font-family:"DM Sans",sans-serif;text-align:center;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.04em;}
 .mode-btn:hover{border-color:var(--rojo);color:var(--rojo);}
 .mode-btn.active{background:var(--rojo);color:#fff;border-color:var(--rojo);}
+/* Colores por producto cuando está activo */
+#btnProd_gar.active{background:#BF0050;border-color:#BF0050;}
+#btnProd_gar:hover{border-color:#BF0050;color:#BF0050;}
+#btnProd_ul.active{background:#0050BF;border-color:#0050BF;}
+#btnProd_ul:hover{border-color:#0050BF;color:#0050BF;}
+#btnProd_comp.active{background:#6A4A9E;border-color:#6A4A9E;}
+#btnProd_comp:hover{border-color:#6A4A9E;color:#6A4A9E;}
 .mode-sub-btn{flex:1;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-3);font-family:"DM Sans",sans-serif;text-align:center;transition:all 0.15s;}
 .mode-sub-btn:hover{border-color:var(--rojo);color:var(--rojo);}
 .mode-sub-btn.active{background:var(--rojo-light);color:var(--rojo);border-color:var(--rojo);font-weight:700;}
@@ -174,6 +181,10 @@ select:focus{border-color:var(--rojo);}
 .cap-manual-table input.cap-input{width:100%;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;text-align:right;}
 .footer{text-align:center;font-size:11px;color:var(--text-3);margin-top:28px;padding-top:16px;border-top:1px solid var(--border);text-transform:uppercase;letter-spacing:0.07em;}
 .footer b{color:var(--rojo);}
+
+/* Datos del cliente a todo el ancho: dos bloques lado a lado */
+.fin-datos-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+@media(max-width:768px){.fin-datos-grid{grid-template-columns:1fr;gap:8px;}}
 
 
 /* ── PÁGINA "PRÓXIMAMENTE" ─────────────────── */
@@ -632,9 +643,10 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
   <!-- PAGE FINANCIERA -->
   <div id="pageFinanciera" class="content" style="display:none">
 
-    <div class="grid2">
-      <!-- LEFT inputs -->
-      <div class="card solo-edicion">
+    <!-- FRANJA 1: DATOS DEL CLIENTE (ancho completo) -->
+    <div class="card solo-edicion" style="margin-bottom:16px;">
+      <div class="fin-datos-grid">
+        <div class="fin-col-a">
         <p class="section-title">Datos del cliente</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div>
@@ -686,12 +698,12 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
           <p class="act-note">&#9888; La rentabilidad Unit Linked es estimada, no garantizada.</p>
         </div>
 
-        <p class="section-title">Aportaciones</p>
+        <p class="section-title" style="margin-top:18px;">Aportaci&oacute;n</p>
         <div style="margin-bottom:12px;">
           <label>Prima inicial / &uacute;nica (&euro;) <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none">(opcional)</span></label>
           <input type="number" id="fPrimaIni" value="0" min="0" step="500" oninput="fCalc()">
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <label>Aportaci&oacute;n peri&oacute;dica (&euro;)</label>
             <input type="number" id="fAportacion" value="200" min="0" step="50" oninput="fCalc()">
@@ -706,10 +718,23 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
             </select>
           </div>
         </div>
+
+        </div><!-- /fin-col-a -->
+
+        <div class="fin-col-b">
+        <p class="section-title">Evoluci&oacute;n de la aportaci&oacute;n</p>
         <div style="margin-bottom:12px;">
           <label>Aumento anual de la aportaci&oacute;n (%) <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;">(opcional)</span></label>
           <input type="number" id="fIncremento" value="0" min="0" max="20" step="0.5" oninput="fCalc()">
           <p class="act-note" style="color:var(--text-3);">&#9432; La aportaci&oacute;n sube este % cada a&ntilde;o sobre la del a&ntilde;o anterior (ej. IPC o subida de sueldo).</p>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <label style="margin:0">Cambios de aportaci&oacute;n <span style="font-size:10px;color:var(--text-3);font-weight:400;text-transform:none;">(subir o bajar)</span></label>
+            <button onclick="fAddEsc()" style="background:var(--rojo);border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;">+ A&ntilde;adir</button>
+          </div>
+          <div id="fEscList"><p style="font-size:12px;color:var(--text-3)">Sin cambios de aportaci&oacute;n. La aportaci&oacute;n se mantiene (con el aumento anual si lo hay).</p></div>
+          <p class="act-note" style="color:var(--text-3);">&#9432; Indica a partir de qu&eacute; a&ntilde;o cambia la aportaci&oacute;n peri&oacute;dica. Ej.: empiezas con 100&euro;/mes y a partir del a&ntilde;o 5 pasas a 200&euro;/mes.</p>
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -718,17 +743,19 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
           </div>
           <div id="fSuplList"><p style="font-size:12px;color:var(--text-3)">Sin aportaciones suplementarias.</p></div>
         </div>
-      </div>
+        </div><!-- /fin-col-b -->
+      </div><!-- /fin-datos-grid -->
+    </div><!-- /franja datos -->
 
-      <!-- RIGHT metrics -->
-      <div style="display:flex;flex-direction:column;gap:14px;">
+    <!-- FRANJA 2: MÉTRICAS (ancho completo) -->
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px;">
         <div class="grid3">
           <div class="metric"><div class="metric-label">Total aportado</div><div class="metric-value" id="fMTotal">&mdash;</div></div>
           <div class="metric"><div class="metric-label" id="fLblRend">Intereses generados</div><div class="metric-value" id="fMRend">&mdash;</div></div>
           <div class="metric" style="border:2px solid var(--verde);"><div class="metric-label" style="color:var(--verde)">Capital final <span style="font-weight:400;text-transform:none;font-size:9px;">(editable &#9998;)</span></div><input type="text" id="fMCapInput" inputmode="numeric" onchange="recalcDesdeCapital()" style="width:100%;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--verde);padding:0;outline:none;" placeholder="&mdash;"></div>
           <div class="metric"><div class="metric-label">Rentabilidad total</div><div class="metric-value" id="fMPct">&mdash;</div></div>
           <div class="metric"><div class="metric-label">A&ntilde;os de ahorro</div><div class="metric-value" id="fMAnios">&mdash;</div></div>
-          <div class="metric" style="border:2px solid var(--rojo);"><div class="metric-label" style="color:var(--rojo)">Renta mensual <span style="font-weight:400;text-transform:none;font-size:9px;">(editable &#9998;)</span></div><input type="text" id="fMMensInput" inputmode="numeric" onchange="recalcDesdeRenta()" style="width:100%;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--rojo);padding:0;outline:none;" placeholder="&mdash;"></div>
+          <div class="metric" style="border:2px solid #BA7517;background:#FAEEDA;"><div class="metric-label" style="color:#854F0B">Renta mensual <span style="font-weight:400;text-transform:none;font-size:9px;">(editable &#9998;)</span></div><input type="text" id="fMMensInput" inputmode="numeric" onchange="recalcDesdeRenta()" style="width:100%;border:none;background:transparent;font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#BA7517;padding:0;outline:none;" placeholder="&mdash;"></div>
         </div>
         <div class="card" style="padding:14px 20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
@@ -747,8 +774,7 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
           <p class="section-title">Comparativa garantizado vs Unit Linked</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="fCompCards"></div>
         </div>
-      </div>
-    </div>
+    </div><!-- /franja métricas -->
 
     <!-- CONTROLES ESENCIALES AHORRO (solo en presentación) -->
     <div class="present-controls">
@@ -1573,6 +1599,59 @@ function fDelSupl(id) {
 function fUpdSuplAnio(id, v)    { var s=fSuplData.find(function(x){return x.id===id;}); if(s){s.anio=parseInt(v)||1;} fCalc(); }
 function fUpdSuplImporte(id, v) { var s=fSuplData.find(function(x){return x.id===id;}); if(s){s.importe=parseFloat(v)||0;} fCalc(); }
 
+// ── Escalones: cambios de aportación periódica a partir de un año ──
+var fEscalones = []; // {id, anio, importe}  importe = nueva aportación periódica
+function fAddEsc() {
+  fEscalones.push({ id: Date.now(), anio: 5, importe: 200 });
+  fRenderEsc();
+  fCalc();
+}
+function fDelEsc(id) {
+  fEscalones = fEscalones.filter(function(e){ return e.id !== id; });
+  fRenderEsc();
+  fCalc();
+}
+function fUpdEscAnio(id, v)    { var e=fEscalones.find(function(x){return x.id===id;}); if(e){e.anio=parseInt(v)||1;} fCalc(); }
+function fUpdEscImporte(id, v) { var e=fEscalones.find(function(x){return x.id===id;}); if(e){e.importe=parseFloat(v)||0;} fCalc(); }
+
+function fRenderEsc() {
+  var c = document.getElementById('fEscList');
+  if (!c) return;
+  if (!fEscalones.length) {
+    c.innerHTML = '<p style="font-size:12px;color:var(--text-3)">Sin cambios de aportaci&oacute;n. La aportaci&oacute;n se mantiene (con el aumento anual si lo hay).</p>';
+    return;
+  }
+  // mostrar en el orden en que se han añadido (el nuevo aparece debajo)
+  var ord = fEscalones;
+  var out = '';
+  ord.forEach(function(e) {
+    out += '<div style="display:grid;grid-template-columns:1fr 1fr 32px;gap:6px;align-items:center;margin-bottom:4px;">';
+    out += '<div><label style="font-size:10px;margin-bottom:2px">A partir del a&ntilde;o</label>';
+    out += '<input type="number" value="'+e.anio+'" min="1" max="50"';
+    out += ' style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px"';
+    out += ' onchange="fUpdEscAnio('+e.id+',this.value)"></div>';
+    out += '<div><label style="font-size:10px;margin-bottom:2px">Nueva aportaci&oacute;n (&euro;)</label>';
+    out += '<input type="number" value="'+e.importe+'" min="0" step="50"';
+    out += ' style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px"';
+    out += ' onchange="fUpdEscImporte('+e.id+',this.value)"></div>';
+    out += '<button onclick="fDelEsc('+e.id+')" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:16px;padding:0;margin-top:14px">&times;</button>';
+    out += '</div>';
+  });
+  c.innerHTML = out;
+}
+
+// Aportación periódica BASE del año i (0-indexed): aplica el escalón vigente.
+// Devuelve el importe por periodo (no anualizado).
+function fAportPeriodoAnio(i, aportInicial) {
+  // escalón vigente = el de mayor año <= (i+1)
+  var vig = aportInicial;
+  var mejorAnio = 0;
+  fEscalones.forEach(function(e){
+    if(e.anio <= (i+1) && e.anio > mejorAnio){ mejorAnio = e.anio; vig = e.importe; }
+  });
+  return { aport: vig, desdeAnio: mejorAnio>0 ? mejorAnio : 1 };
+}
+
 function fRenderSupl() {
   var c = document.getElementById('fSuplList');
   if (!fSuplData.length) {
@@ -1610,7 +1689,11 @@ function fSim(tasa, eIni, eFin, prima, aport, periodo, supls, incremento) {
   var aportado = prima;
   var rows = [];
   for (var i = 0; i < anios; i++) {
-    var aAnual = aport * periodo * Math.pow(1 + inc, i); // aportación con aumento compuesto
+    // aportación base del año según escalón vigente
+    var esc = fAportPeriodoAnio(i, aport);
+    // el % de aumento se aplica desde el año en que arrancó el escalón vigente
+    var aniosDesdeEsc = (i+1) - esc.desdeAnio;
+    var aAnual = esc.aport * periodo * Math.pow(1 + inc, aniosDesdeEsc);
     var supl = 0;
     supls.forEach(function(s) { if (s.anio===i+1) supl += s.importe; });
     cap = cap * (1 + tasa/100) + aAnual + supl;
@@ -1664,6 +1747,32 @@ function fCalc() {
   document.getElementById('fMPct').textContent      = sim.aportado>0 ? ((sim.rend/sim.aportado)*100).toFixed(1)+'%' : '\u2014';
   document.getElementById('fMAnios').textContent    = sim.anios+' a\u00f1os';
 
+  // Pastilla de intereses: color según producto (azul=garantizado, rojo/rosa=Unit Linked)
+  var rendCard = document.getElementById('fMRend').closest('.metric');
+  var rendLbl  = document.getElementById('fLblRend');
+  var rendVal  = document.getElementById('fMRend');
+  if(rendCard){
+    if(isUL){
+      // Unit Linked → azul
+      rendCard.style.background='#E6F1FB';
+      rendCard.style.border='2px solid #0050BF';
+      rendLbl.style.color='#0050BF';
+      rendVal.style.color='#0050BF';
+    } else if(isComp){
+      // Comparar → neutro (muestra ambos en el gráfico)
+      rendCard.style.background='';
+      rendCard.style.border='';
+      rendLbl.style.color='';
+      rendVal.style.color='';
+    } else {
+      // Garantizado → rojo
+      rendCard.style.background='#FAE8EF';
+      rendCard.style.border='2px solid #BF0050';
+      rendLbl.style.color='#BF0050';
+      rendVal.style.color='#BF0050';
+    }
+  }
+
   // Renta mensual estimada: convertir capital en renta durante N años
   var aniosRenta = parseInt(document.getElementById('fAniosRenta').value) || 20;
   document.getElementById('fAniosRentaVal').value = aniosRenta;
@@ -1702,11 +1811,11 @@ function fCalc() {
     var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData, inc);
     datasets = [
       {label:'Aportado',    data:dAport,  borderColor:'#9a7080',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,tension:0.3},
-      {label:'Garantizado', data:sGc.rows.map(function(r){return +r.cap.toFixed(2);}), borderColor:'#0050bf',borderWidth:2,pointRadius:0,fill:false,tension:0.3},
-      {label:'Unit Linked', data:sUc.rows.map(function(r){return +r.cap.toFixed(2);}), borderColor:'#BF0050',borderWidth:2,pointRadius:0,fill:false,tension:0.3}
+      {label:'Garantizado', data:sGc.rows.map(function(r){return +r.cap.toFixed(2);}), borderColor:'#BF0050',borderWidth:2,pointRadius:0,fill:false,tension:0.3},
+      {label:'Unit Linked', data:sUc.rows.map(function(r){return +r.cap.toFixed(2);}), borderColor:'#0050bf',borderWidth:2,pointRadius:0,fill:false,tension:0.3}
     ];
   } else {
-    var col = isUL ? '#BF0050' : '#0050bf';
+    var col = isUL ? '#0050bf' : '#BF0050';
     datasets = [
       {label:'Aportado', data:dAport, borderColor:'#9a7080',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,tension:0.3},
       {label:'Capital',  data:dCap,   borderColor:col,borderWidth:2.5,pointRadius:0,fill:false,tension:0.3}
@@ -1728,12 +1837,12 @@ function fCalc() {
     var sUc = fSim(tUL2,  eIni, eFin, prima, aport, per, fSuplData, inc);
     barDatasets = [
       {label:'Aportado',           data:dAport,  backgroundColor:'rgba(154,112,128,0.5)', stack:'g'},
-      {label:'Rend. Garantizado',  data:sGc.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);}), backgroundColor:'rgba(0,80,191,0.7)', stack:'g'},
+      {label:'Rend. Garantizado',  data:sGc.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);}), backgroundColor:'rgba(191,0,80,0.7)', stack:'g'},
       {label:'Aportado (UL)',      data:dAport,  backgroundColor:'rgba(154,112,128,0.5)', stack:'u'},
-      {label:'Rend. Unit Linked',  data:sUc.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);}), backgroundColor:'rgba(191,0,80,0.75)', stack:'u'}
+      {label:'Rend. Unit Linked',  data:sUc.rows.map(function(r){return +Math.max(0,r.rend).toFixed(2);}), backgroundColor:'rgba(0,80,191,0.75)', stack:'u'}
     ];
   } else {
-    var colRend2 = isUL ? 'rgba(191,0,80,0.75)' : 'rgba(0,80,191,0.7)';
+    var colRend2 = isUL ? 'rgba(0,80,191,0.75)' : 'rgba(191,0,80,0.7)';
     var colAport = 'rgba(154,112,128,0.45)';
     barDatasets = [
       {label:'Capital aportado',    data:dAport, backgroundColor:colAport,  stack:'s'},
@@ -1835,17 +1944,27 @@ function fCalc() {
   });
 
   // ── Rentabilidad de cada prima según la edad a la que se aporta ──
-  var aportBase = aport * per;
+  // Incluye: aportación periódica (con escalones+incremento), suplementarias y prima inicial.
   var incF = (inc || 0) / 100;
   var labelsP=[], aportadoP=[], rendP=[], valoresFin=[];
-  for(var ed=eIni; ed<eFin; ed++){
-    var idxAnio = ed - eIni;
-    var aportAnioEd = aportBase * Math.pow(1 + incF, idxAnio); // prima de ese año con aumento aplicado
+  for(var idxA=0; idxA<(eFin-eIni); idxA++){
+    var ed = eIni + idxA;
     var aniosCrece = eFin - ed;
-    var valorFinal = aportAnioEd * Math.pow(1 + tasa/100, aniosCrece);
+    var factorCrece = Math.pow(1 + tasa/100, aniosCrece);
+    // aportación periódica de ese año (escalón vigente + incremento desde el escalón)
+    var escP = fAportPeriodoAnio(idxA, aport);
+    var aniosDesdeEsc = (idxA+1) - escP.desdeAnio;
+    var aportPeriodica = escP.aport * per * Math.pow(1 + incF, aniosDesdeEsc);
+    // suplementarias aportadas ese año
+    var suplAnio = 0;
+    fSuplData.forEach(function(s){ if(s.anio===idxA+1) suplAnio += s.importe; });
+    // prima inicial: se considera aportada en el año 1 (idxA===0)
+    var primaIniAnio = (idxA===0) ? (prima||0) : 0;
+    var aportadoAnio = aportPeriodica + suplAnio + primaIniAnio;
+    var valorFinal = aportadoAnio * factorCrece;
     labelsP.push(ed);
-    aportadoP.push(Math.round(aportAnioEd));
-    rendP.push(Math.round(valorFinal - aportAnioEd));
+    aportadoP.push(Math.round(aportadoAnio));
+    rendP.push(Math.round(valorFinal - aportadoAnio));
     valoresFin.push(valorFinal);
   }
   if(window.fChartPrimasInst) window.fChartPrimasInst.destroy();
@@ -1876,7 +1995,7 @@ function fCalc() {
   }
   // Resumen: primera, media y última prima
   var resEl=document.getElementById('fPrimasResumen');
-  if(labelsP.length>=2 && aportBase>0){
+  if(labelsP.length>=2 && aportadoP[0]>0){
     var iPrim=0, iUlt=labelsP.length-1, iMed=Math.floor(labelsP.length/2);
     function tarjeta(idx, etiqueta){
       var mult=(valoresFin[idx]/aportadoP[idx]);
@@ -1893,15 +2012,21 @@ function fCalc() {
   // Indicativo de la prima (mensual → anual → valor de la primera prima)
   var indEl=document.getElementById('fPrimaIndicativo');
   if(indEl){
-    if(aportBase>0 && labelsP.length>=1){
+    var aport1 = aport * per; // aportación periódica anualizada del primer año
+    if(aport1>0 && labelsP.length>=1){
       var nombrePer={12:'mes',4:'trimestre',2:'semestre',1:'año'}[per]||'periodo';
       var multPrim=(valoresFin[0]/aportadoP[0]);
-      var incTxt = (inc>0) ? ' Con un aumento anual del '+inc+'%, las aportaciones de los años siguientes serán mayores.' : '';
+      var extras = [];
+      if((prima||0)>0) extras.push('tu prima inicial de '+fK(prima));
+      if(fSuplData.some(function(s){return s.anio===1;})) extras.push('las aportaciones suplementarias');
+      var extraTxt = extras.length ? ' El primer año incluye '+extras.join(' y ')+'.' : '';
+      var incTxt = (inc>0) ? ' Con un aumento anual del '+inc+'%, las aportaciones siguientes serán mayores.' : '';
+      var escTxt = (fEscalones.length>0) ? ' Se han aplicado tus cambios de aportación.' : '';
       indEl.style.display='';
       indEl.innerHTML='Aportando <strong>'+aport.toLocaleString('es-ES')+' € al '+nombrePer+'</strong>'
-        +' &rarr; <strong>'+aportBase.toLocaleString('es-ES')+' € el primer año</strong>. '
-        +'La primera prima (a los '+labelsP[0]+' años) se convierte en <strong>'+Math.round(valoresFin[0]).toLocaleString('es-ES')+' €</strong> al vencimiento, '
-        +'un <strong>×'+multPrim.toFixed(1)+'</strong> de lo aportado.'+incTxt;
+        +' &rarr; <strong>'+aportadoP[0].toLocaleString('es-ES')+' € el primer año</strong>. '
+        +'Esa primera aportación (a los '+labelsP[0]+' años) se convierte en <strong>'+Math.round(valoresFin[0]).toLocaleString('es-ES')+' €</strong> al vencimiento, '
+        +'un <strong>×'+multPrim.toFixed(1)+'</strong> de lo aportado.'+extraTxt+incTxt+escTxt;
     } else {
       indEl.style.display='none';
     }
@@ -1994,6 +2119,7 @@ function recalcDesdeRenta(){
 }
 
 fRenderSupl();
+fRenderEsc();
 
 </script>
 </body>
