@@ -175,6 +175,7 @@ select:focus{border-color:var(--rojo);}
 .footer{text-align:center;font-size:11px;color:var(--text-3);margin-top:28px;padding-top:16px;border-top:1px solid var(--border);text-transform:uppercase;letter-spacing:0.07em;}
 .footer b{color:var(--rojo);}
 
+
 /* ── PÁGINA "PRÓXIMAMENTE" ─────────────────── */
 .coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;min-height:50vh;}
 .coming-soon .cs-icon{font-size:56px;margin-bottom:18px;}
@@ -269,6 +270,64 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
 </style>
 </head>
 <body>
+
+<!-- ════ PANTALLA DE ACCESO ════ -->
+<div id="loginGate" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#8a0039,#BF0050);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:24px;">
+  <div style="background:#fff;border-radius:18px;padding:40px 34px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+    <div style="display:flex;justify-content:center;margin-bottom:18px;">
+      <svg viewBox="0 0 24 24" width="56" height="56" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 8.5 L9.5 5 L6 5 L3.8 8 L3.8 11.5 L12 21 L20.2 11.5 L20.2 8 L18 5 L14.5 5 Z" fill="#BF0050" fill-opacity="0.95"/>
+        <path d="M12 8.5 L14.5 5 L18 5 L20.2 8 L20.2 11.5 L12 21 Z" fill="#8a0039" fill-opacity="0.95"/>
+      </svg>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#1a1a1a;margin-bottom:4px;">SM Seguros</div>
+    <div style="font-size:13px;color:#888;margin-bottom:24px;">Herramientas internas &middot; Acceso del equipo</div>
+    <input type="password" id="loginPwd" placeholder="Contrase&ntilde;a del equipo" autocomplete="current-password"
+      style="width:100%;padding:12px 14px;border:1px solid #e0b0c8;border-radius:10px;font-size:16px;outline:none;margin-bottom:10px;font-family:inherit;"
+      onkeydown="if(event.key==='Enter')comprobarAcceso()">
+    <div id="loginError" style="color:#BF0050;font-size:13px;margin-bottom:12px;min-height:18px;font-weight:600;"></div>
+    <button onclick="comprobarAcceso()"
+      style="width:100%;padding:12px;background:#BF0050;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;"
+      onmouseover="this.style.background='#a00040'" onmouseout="this.style.background='#BF0050'">Entrar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PWD_HASH='99661aff899850bf7477bf1800130cb5fcf284770916ab4218868546e8069f45';
+  var SESION_KEY='sm_calc_acceso_ok';
+
+  async function sha256(txt){
+    var buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+
+  window.comprobarAcceso=async function(){
+    var val=document.getElementById('loginPwd').value;
+    var err=document.getElementById('loginError');
+    if(!val){err.textContent='Introduce la contraseña.';return;}
+    var h=await sha256(val);
+    if(h===PWD_HASH){
+      try{ localStorage.setItem(SESION_KEY,'1'); }catch(e){}
+      document.getElementById('loginGate').style.display='none';
+    } else {
+      err.textContent='Contraseña incorrecta.';
+      document.getElementById('loginPwd').value='';
+      document.getElementById('loginPwd').focus();
+    }
+  };
+
+  // Si ya hay sesión recordada en este dispositivo, no pedir contraseña
+  try{
+    if(localStorage.getItem(SESION_KEY)==='1'){
+      document.getElementById('loginGate').style.display='none';
+    } else {
+      setTimeout(function(){var p=document.getElementById('loginPwd');if(p)p.focus();},200);
+    }
+  }catch(e){}
+})();
+</script>
+
 
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -838,6 +897,7 @@ body.presentando #pageFinanciera .grid2 > div:last-child{width:100%;}
 
 </main>
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 const tarifas={14:{1:0.59,2:0.08,3:0.62},15:{1:0.65,2:0.08,3:0.62},16:{1:0.68,2:0.08,3:0.62},17:{1:0.74,2:0.08,3:0.62},18:{1:0.79,2:0.08,3:0.62},19:{1:0.81,2:0.09,3:0.62},20:{1:0.81,2:0.10,3:0.62},21:{1:0.84,2:0.11,3:0.63},22:{1:0.84,2:0.12,3:0.67},23:{1:0.84,2:0.14,3:0.73},24:{1:0.84,2:0.15,3:0.78},25:{1:0.85,2:0.16,3:0.79},26:{1:0.85,2:0.17,3:0.80},27:{1:0.85,2:0.18,3:0.81},28:{1:0.85,2:0.20,3:0.87},29:{1:0.85,2:0.22,3:0.93},30:{1:0.86,2:0.24,3:1.00},31:{1:0.86,2:0.27,3:1.08},32:{1:0.86,2:0.30,3:1.18},33:{1:0.86,2:0.33,3:1.28},34:{1:0.87,2:0.36,3:1.38},35:{1:0.90,2:0.41,3:1.55},36:{1:0.95,2:0.46,3:1.73},37:{1:1.01,2:0.52,3:1.93},38:{1:1.06,2:0.57,3:2.12},39:{1:1.17,2:0.64,3:2.33},40:{1:1.31,2:0.71,3:2.59},41:{1:1.48,2:0.78,3:2.88},42:{1:1.69,2:0.87,3:3.22},43:{1:1.96,2:0.97,3:3.62},44:{1:2.13,2:1.07,3:4.07},45:{1:2.32,2:1.21,3:4.62},46:{1:2.55,2:1.36,3:4.92},47:{1:2.80,2:1.53,3:5.40},48:{1:3.09,2:1.70,3:6.01},49:{1:3.53,2:1.89,3:6.68},50:{1:3.99,2:2.09,3:7.40},51:{1:4.45,2:2.32,3:8.18},52:{1:4.92,2:2.58,3:8.99},53:{1:5.39,2:2.86,3:9.85},54:{1:5.92,2:3.18,3:10.76},55:{1:6.47,2:3.57,3:11.85},56:{1:7.06,2:4.00,3:13.02},57:{1:7.69,2:4.49,3:14.30},58:{1:8.35,2:4.99,3:15.69},59:{1:9.04,2:5.54,3:17.36},60:{1:9.77,2:6.15,3:19.27},61:{1:10.57,2:6.83,3:21.15},62:{1:11.42,2:7.59,3:22.69},63:{1:12.36,2:8.43,3:23.92},64:{1:14.04,2:9.37,3:25.16},65:{1:15.88,2:10.90,3:26.44},66:{1:17.90,2:12.60,3:28.42},67:{1:20.14},68:{1:22.62},69:{1:24.74},70:{1:27.14},71:{1:29.89},72:{1:33.03},73:{1:38.39},74:{1:44.47},75:{1:51.36},76:{1:59.17},77:{1:68.02},78:{1:76.30},79:{1:85.76},80:{1:96.58},81:{1:108.98},82:{1:123.17},83:{1:139.40},84:{1:157.88},85:{1:178.82},86:{1:202.43},87:{1:228.89},88:{1:258.37},89:{1:290.97},90:{1:326.78},91:{1:365.87},92:{1:408.28},93:{1:454.06},94:{1:503.25}};
@@ -1238,7 +1298,7 @@ function calcular(){
       const aniosRestantes = nAnios - idxCruce;
       cruceEl.style.display='';
       cruceEl.innerHTML='🎯 <strong>A partir del año '+anioCruce+' (a los '+edadCruce+' años)</strong>, tu ahorro acumulado iguala o supera el capital que necesitarías asegurar. '
-        +'En ese punto, tu propio ahorro te protege y la póliza de vida temporal deja de ser necesaria.'
+        +'En ese punto, tu propio ahorro te protege y la póliza de vida temporal deja de ser imprescindible.'
         +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(26,122,58,0.25);">'
         +'💰 Si decides no mantener el seguro de vida a partir de ese momento, te ahorrarías aproximadamente <strong>'+fmt(primasAhorradas)+'</strong> en primas '
         +'durante los <strong>'+aniosRestantes+' año'+(aniosRestantes>1?'s':'')+'</strong> restantes del horizonte proyectado'
@@ -1934,6 +1994,7 @@ function recalcDesdeRenta(){
 }
 
 fRenderSupl();
+
 </script>
 </body>
 </html>
